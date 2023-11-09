@@ -33,6 +33,41 @@ class Book {
     }
 }
 
+
+
+
+class DuplicateIsbnException extends Exception{
+   public DuplicateIsbnException(String messege){
+        super(messege);
+   }
+}
+
+
+class AlreadyCheckedOutException extends Exception{
+    public AlreadyCheckedOutException(String messege){
+        super(messege);
+    }
+}
+
+
+
+class NotCheckedOutException extends Exception{
+    public NotCheckedOutException(String messege){
+        super(messege);
+    }
+}
+
+class NotfoundException extends Exception{
+    public NotfoundException(String messege){
+        super(messege);
+    }
+}
+
+
+
+
+
+
 class Library {
     private List<Book> books;
 
@@ -44,12 +79,16 @@ class Library {
 
 
     public void addBook(Book book) {
-        for (Book existingBook : books) {
-            if (existingBook.getIsbn().equals(book.getIsbn())) {
-                throw new IllegalArgumentException("This book already exists in the library with the same ISBN.");
+        try{
+            for (Book existingBook : books) {
+                if (existingBook.getIsbn().equals(book.getIsbn())) {
+                    throw new DuplicateIsbnException("This book already exists in the library with the same ISBN.");
+                }
             }
+            books.add(book);
+        } catch (DuplicateIsbnException e1) {
+            System.out.println("Error: " + e1.getMessage());
         }
-        books.add(book);
     }
 
 
@@ -68,34 +107,49 @@ class Library {
 
 
     public void checkOutBook(String isbn) {
+       
+       try{
         Book book = findBookByIsbn(isbn);
         if (book != null) {
             if (book.isCheckedOut()) {
-                throw new IllegalArgumentException("This book is already checked out.");
-            } else {
+                throw new AlreadyCheckedOutException("This book is already checked out.");
+            }
+        
+            else {
                 book.setCheckedOut(true);
                 System.out.println("Checked out: " + book.toString());
             }
-        } else {
-            throw new IllegalArgumentException("Book with the provided ISBN not found in the library.");
+        }
+    
+         else {
+            throw new NotfoundException("Book with the provided ISBN not found in the library.");
         }
     }
+        catch(AlreadyCheckedOutException | NotfoundException e){
+            System.out.println("Errror : "+e.getMessage());
+        }
+
+    
+}
 
 
-
-
-
-    public void returnBook(String isbn) {
-        Book book = findBookByIsbn(isbn);
+   public void returnBook(String isbn) {
+       
+    try{
+    Book book = findBookByIsbn(isbn);
         if (book != null) {
             if (book.isCheckedOut()) {
                 book.setCheckedOut(false);
                 System.out.println("Returned: " + book.toString());
             } else {
-                throw new IllegalArgumentException("This book has not been checked out.");
+                throw new NotCheckedOutException("This book has not been checked out.");
             }
+        
         } else {
-            throw new IllegalArgumentException("Book with the provided ISBN not found in the library.");
+            throw new NotfoundException ("Book with the provided ISBN not found in the library.");
+        }
+    } catch (NotCheckedOutException | NotfoundException e) {
+            System.out.println("Error: " + e.getMessage());
         }
     }
 }
@@ -113,13 +167,9 @@ public class LibraryManagementSystem {
         library.addBook(book1);
         library.addBook(book2);
 
-        try {
-            
-            Book duplicateBook = new Book("this is Duplicate Book", "deepak", "1234");
-            library.addBook(duplicateBook);
-        } catch (IllegalArgumentException e) {
-            System.out.println("Error: " + e.getMessage());
-        }
+        Book duplicateBook = new Book("this is Duplicate Book", "deepak", "1234");
+        library.addBook(duplicateBook);
+
 
        
         library.checkOutBook("1234");
@@ -127,20 +177,13 @@ public class LibraryManagementSystem {
 
 
 
-        try {
-           
-            library.checkOutBook("1234");
-        } catch (IllegalArgumentException e) {
-            System.out.println("Error: " + e.getMessage());
-        }
+        library.checkOutBook("1234");
+       
 
-        library.returnBook("1234");       
-
-        try {
-           
-            library.returnBook("1234");
-        } catch (IllegalArgumentException e) {
-            System.out.println("Error: " + e.getMessage());
-        }
+        library.returnBook("1234");  
+        
+    
+        library.returnBook("1234");
+        
     }
 }
